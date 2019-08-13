@@ -12,10 +12,10 @@
       >
         <h2>用户登录</h2>
         <el-form-item label="用户名" prop="username">
-          <el-input type="password" v-model="ruleForm.username" autocomplete="off"></el-input>
+          <el-input type="text" v-model.trim="ruleForm.username" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input type="password" v-model="ruleForm.password" autocomplete="off"></el-input>
+          <el-input type="password" v-model.trim="ruleForm.password" autocomplete="off"></el-input>
         </el-form-item>
 
         <el-form-item>
@@ -52,9 +52,23 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
-          alert("submit!");
+            console.log(this.ruleForm.username)
+            this.$axios.post('login',{
+                username : this.ruleForm.username,
+                password : this.ruleForm.password
+            })
+            .then(res=>{
+                console.log(res)
+                if(res.data.meta.status == 400) {
+                    this.$message.error('账号或密码错误')
+                }else if(res.data.meta.status == 200) {
+                    this.$message.success(res.data.meta.msg);
+                    this.$router.push('/index')
+                }
+            })
         } else {
-          console.log("error submit!!");
+        //   console.log("error submit!!");
+          this.$message.error('请按提示正确输入信息');
           return false;
         }
       });
