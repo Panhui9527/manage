@@ -27,6 +27,9 @@
 </template>
 
 <script>
+//导入login组件 
+import {login} from "../api/axios";
+
 export default {
   data() {
     return {
@@ -50,25 +53,37 @@ export default {
   methods: {
     //点击登录
     submitForm(formName) {
-      this.$refs[formName].validate(valid => {
+      this.$refs[formName].validate(valid => { 
+
+          //输入格式正确
         if (valid) {
-            console.log(this.ruleForm.username)
-            this.$axios.post('login',{
-                username : this.ruleForm.username,
-                password : this.ruleForm.password
-            })
-            .then(res=>{
-                console.log(res)
-                if(res.data.meta.status == 400) {
-                    this.$message.error('账号或密码错误')
-                }else if(res.data.meta.status == 200) {
-                    this.$message.success(res.data.meta.msg);
-                    this.$router.push('/index')
-                }
-            })
+
+          //调用包装的axios登录函数
+          login(this.ruleForm)
+          .then(res => {
+            //密码或账号错误
+            // console.log(res)
+            if (res.data.meta.status == 400) {
+
+              this.$message.error(res.data.data.msg);
+
+              //输入正确
+            } else if (res.data.meta.status == 200) {
+                //保存token
+              window.localStorage.setItem('token', res.data.data.token);
+
+              this.$message.success(res.data.meta.msg);
+
+              //跳转index
+              this.$router.push("/index");
+            }
+          });
+
+          //输入格式错误
         } else {
-        //   console.log("error submit!!");
-          this.$message.error('请按提示正确输入信息');
+
+          this.$message.error("请按提示正确输入信息");
+          
           return false;
         }
       });
@@ -93,13 +108,13 @@ export default {
     height: 350px;
     background-color: #fff;
 
-    h2{
-        margin-bottom: 15px
+    h2 {
+      margin-bottom: 15px;
     }
 
-    .btn{
-        margin-top: 20px;
-        width: 100%;
+    .btn {
+      margin-top: 20px;
+      width: 100%;
     }
   }
 }
